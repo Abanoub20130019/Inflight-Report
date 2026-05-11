@@ -1,0 +1,9 @@
+# Snowflake Streamlit Package Dependencies
+# Note: Snowflake Streamlit primarily uses the Snowsight UI for package management.
+# Upload this file as a reference, then add 'openpyxl' via the Packages dropdown
+# in the Streamlit editor inside Snowsight.
+name: inflight_report_env
+channels:
+  - snowflake
+dependencies:
+  - openpyxl=*
