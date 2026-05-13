@@ -564,8 +564,11 @@ if uploaded_raw is not None:
         tab1, tab2, tab3 = st.tabs(["By Market", "By Channel", "By Funnel"])
         for tab, group_col in [(tab1, "Market"), (tab2, "Channel"), (tab3, "Funnel Type")]:
             with tab:
+                # Reach is unique users: use max at channel level (don't double-count),
+                # but sum at market/funnel level since those are different audiences.
+                reach_agg = "max" if group_col == "Channel" else "sum"
                 summary = filtered_df.groupby(group_col).agg({
-                    "Cost $": "sum", "Impressions": "sum", "Reach": "sum",
+                    "Cost $": "sum", "Impressions": "sum", "Reach": reach_agg,
                     "Clicks": "sum", "Sessions": "sum", "Orders": "sum",
                     "Revenue $": "sum", "Off. Orders": "sum", "Off. Revenue $": "sum"
                 }).reset_index()
@@ -734,6 +737,9 @@ if uploaded_raw is not None:
 
                 # Build ALL aggregation
                 all_data = {}
+                # Track max reach per market per platform so we sum across markets
+                # but don't double-count campaigns within the same market+channel.
+                awareness_market_reach = {}  # key -> {market: {"planned": x, "achieved": y}}
                 for r in report_rows:
                     f = r["funnel"]
                     key = (f, r["platform"], r["campaign_adformat"])
@@ -764,19 +770,29 @@ if uploaded_raw is not None:
                             "purchases_value_achieved": 0,
                             "purchase_roas_achieved": 0,
                         }
+                        if f == "Awareness":
+                            awareness_market_reach[key] = {}
                     entry = all_data[f][key]
                     entry["budget_planned"] += r["budget_planned"]
                     entry["budget_achieved"] += r["budget_achieved"]
                     entry["impressions_planned"] += r["impressions_planned"]
                     entry["impressions_achieved"] += r["impressions_achieved"]
-                    entry["metric_planned"] += r["metric_planned"]
-                    entry["metric_achieved"] += r["metric_achieved"]
                     entry["sessions_achieved"] += r["sessions_achieved"]
                     entry["purchases_achieved"] += r["purchases_achieved"]
                     entry["purchases_value_achieved"] += r["purchases_value_achieved"]
                     if f == "Awareness":
+                        market = r["market"]
+                        if market not in awareness_market_reach[key]:
+                            awareness_market_reach[key][market] = {"planned": 0, "achieved": 0}
+                        awareness_market_reach[key][market]["planned"] = max(awareness_market_reach[key][market]["planned"], r["metric_planned"])
+                        awareness_market_reach[key][market]["achieved"] = max(awareness_market_reach[key][market]["achieved"], r["metric_achieved"])
+                        entry["metric_planned"] = sum(v["planned"] for v in awareness_market_reach[key].values())
+                        entry["metric_achieved"] = sum(v["achieved"] for v in awareness_market_reach[key].values())
                         entry["views_achieved"] += r["views_achieved"]
                         entry["engagement_achieved"] += r["engagement_achieved"]
+                    else:
+                        entry["metric_planned"] += r["metric_planned"]
+                        entry["metric_achieved"] += r["metric_achieved"]
 
                 # Compute derived fields for ALL
                 all_report_data = {}
@@ -816,7 +832,7 @@ if uploaded_raw is not None:
                 detail_data = filtered_df.copy()
 
                 summary = filtered_df.groupby(["Market", "Channel", "Funnel Type"]).agg({
-                    "Cost $": "sum", "Impressions": "sum", "Reach": "sum",
+                    "Cost $": "sum", "Impressions": "sum", "Reach": "max",
                     "Clicks": "sum", "Sessions": "sum", "Orders": "sum",
                     "Revenue $": "sum", "Off. Orders": "sum", "Off. Revenue $": "sum"
                 }).reset_index()
@@ -866,7 +882,7 @@ if uploaded_raw is not None:
                 for funnel in filtered_df["Funnel Type"].unique():
                     funnel_df = filtered_df[filtered_df["Funnel Type"] == funnel]
                     pivot = funnel_df.groupby(["Market", "Channel"]).agg({
-                        "Cost $": "sum", "Impressions": "sum", "Reach": "sum",
+                        "Cost $": "sum", "Impressions": "sum", "Reach": "max",
                         "Clicks": "sum", "Sessions": "sum", "Orders": "sum",
                         "Revenue $": "sum", "Off. Orders": "sum", "Off. Revenue $": "sum"
                     }).reset_index()
