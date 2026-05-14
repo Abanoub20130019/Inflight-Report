@@ -46,6 +46,14 @@ def normalize_campaign(name):
     return str(name).strip().lower()
 
 
+def extract_placement(campaign_name):
+    """Extract ad placement from campaign name (last segment after underscore)."""
+    if pd.isna(campaign_name):
+        return ""
+    parts = str(campaign_name).strip().rsplit("_", 1)
+    return parts[-1] if len(parts) > 1 else ""
+
+
 def format_platform(channel, optimization, funnel, campaign_name="", combine=False):
     """Format platform name similar to the template.
     When combine=True, similar platforms are grouped together (e.g. all TikTok variants -> TIKTOK).
@@ -172,6 +180,7 @@ def build_formatted_report(report_data_by_market, all_data):
         23: 10,  # Purchases
         24: 14,  # Purchases Value
         25: 12,  # Purchase Roas
+        26: 12,  # Ad Placement
     }
     for col, width in col_widths.items():
         ws.column_dimensions[get_column_letter(col)].width = width
@@ -186,6 +195,7 @@ def build_formatted_report(report_data_by_market, all_data):
         "Freq", "",
         "Views", "Engagement", "VTR", "ER",
         "Sessions", "Purchases", "Purchases Value", "Purchase Roas",
+        "Ad Placement",
     ]
     AWARENESS_SUBHEADERS = [
         "", "", "",
@@ -196,6 +206,7 @@ def build_formatted_report(report_data_by_market, all_data):
         "Planned", "Achieved",
         "Achieved", "Achieved", "Achieved", "Achieved",
         "Achieved", "Achieved", "Achieved", "Achieved",
+        "",
     ]
 
     CONSIDERATION_HEADERS = [
@@ -206,6 +217,7 @@ def build_formatted_report(report_data_by_market, all_data):
         "CPC", "",
         "CTR", "",
         "Sessions", "Purchases", "Purchases Value", "Purchase Roas",
+        "Ad Placement",
     ]
     CONSIDERATION_SUBHEADERS = [
         "", "", "",
@@ -215,6 +227,7 @@ def build_formatted_report(report_data_by_market, all_data):
         "Planned", "Achieved",
         "Planned", "Achieved",
         "Achieved", "Achieved", "Achieved", "Achieved",
+        "",
     ]
 
     def add_kpi_banner(row, last_col):
@@ -347,6 +360,8 @@ def build_formatted_report(report_data_by_market, all_data):
             c24.number_format = "$#,##0.00"; c24.border = thin_border; c24.alignment = right_align; c24.font = data_font
             c25 = ws.cell(row=row, column=25, value=data.get("purchase_roas_achieved", 0) or None)
             c25.number_format = "0.00"; c25.border = thin_border; c25.alignment = right_align; c25.font = data_font
+            c26 = ws.cell(row=row, column=26, value=data.get("placement", ""))
+            c26.border = thin_border; c26.alignment = center_align; c26.font = data_font
         else:
             c18 = ws.cell(row=row, column=18, value=data.get("sessions_achieved", 0) or None)
             c18.number_format = "#,##0"; c18.border = thin_border; c18.alignment = right_align; c18.font = data_font
@@ -356,7 +371,9 @@ def build_formatted_report(report_data_by_market, all_data):
             c20.number_format = "$#,##0.00"; c20.border = thin_border; c20.alignment = right_align; c20.font = data_font
             c21 = ws.cell(row=row, column=21, value=data.get("purchase_roas_achieved", 0) or None)
             c21.number_format = "0.00"; c21.border = thin_border; c21.alignment = right_align; c21.font = data_font
-            for col in range(22, 26):
+            c22 = ws.cell(row=row, column=22, value=data.get("placement", ""))
+            c22.border = thin_border; c22.alignment = center_align; c22.font = data_font
+            for col in range(23, 27):
                 c = ws.cell(row=row, column=col, value=None)
                 c.border = thin_border
         return row + 1
@@ -386,7 +403,7 @@ def build_formatted_report(report_data_by_market, all_data):
             rows = market_data.get(funnel, [])
             if not rows:
                 continue
-            last_col = 25 if funnel == "Awareness" else 21
+            last_col = 26 if funnel == "Awareness" else 22
             current_row = add_kpi_banner(current_row, last_col)
             if funnel == "Awareness":
                 current_row = apply_header_row(current_row, AWARENESS_HEADERS, AWARENESS_SUBHEADERS, last_col)
@@ -449,6 +466,7 @@ if uploaded_media is not None:
 if uploaded_raw is not None:
     df = pd.read_csv(uploaded_raw)
     df["Week"] = pd.to_numeric(df["Week"], errors="coerce").astype("Int64")
+    df["Placement"] = df["Campaign"].apply(extract_placement)
 
     available_brands = sorted(df["Brand"].dropna().unique())
     available_markets = sorted(df["Market"].dropna().unique())
@@ -667,6 +685,7 @@ if uploaded_raw is not None:
 
                     platform = format_platform(channel, optimization, funnel, row["Campaign"], combine=combine_platforms)
                     campaign_adformat = str(optimization).strip() if optimization else ""
+                    placement = str(row.get("Placement", "")).strip()
 
                     if funnel == "Awareness":
                         report_rows.append({
@@ -695,6 +714,7 @@ if uploaded_raw is not None:
                             "purchases_achieved": orders_achieved,
                             "purchases_value_achieved": revenue_achieved,
                             "purchase_roas_achieved": roas,
+                            "placement": placement,
                         })
                     else:
                         # Consideration or Conversion
@@ -724,6 +744,7 @@ if uploaded_raw is not None:
                             "purchases_achieved": orders_achieved,
                             "purchases_value_achieved": revenue_achieved,
                             "purchase_roas_achieved": roas,
+                            "placement": placement,
                         })
 
                 # Group by market and funnel
@@ -821,6 +842,7 @@ if uploaded_raw is not None:
                 # Add data sheets using pandas
                 raw_data = pd.DataFrame({
                     "Campaign name": filtered_df["Campaign"],
+                    "Placement": filtered_df["Placement"],
                     "Cost": filtered_df["Cost $"],
                     "Impressions": filtered_df["Impressions"],
                     "Reach": filtered_df["Reach"],
