@@ -229,13 +229,13 @@ def build_formatted_report(report_data_by_market, all_data):
     ]
 
     def add_kpi_banner(row, last_col):
-        cell = ws.cell(row=row, column=9, value="Primary KPI")
+        cell = ws.cell(row=row, column=8, value="Primary KPI")
         cell.fill = kpi_fill
         cell.font = kpi_font
         cell.alignment = center_align
         cell.border = thin_border
-        ws.merge_cells(start_row=row, start_column=9, end_row=row, end_column=last_col)
-        for col in range(9, last_col + 1):
+        ws.merge_cells(start_row=row, start_column=8, end_row=row, end_column=last_col)
+        for col in range(8, last_col + 1):
             c = ws.cell(row=row, column=col)
             c.fill = kpi_fill
             c.border = thin_border
@@ -257,11 +257,11 @@ def build_formatted_report(report_data_by_market, all_data):
             cell.border = thin_border
             cell.alignment = center_align
         # Merge grouped headers
-        ws.merge_cells(start_row=row, start_column=9, end_row=row, end_column=11)   # Budget
-        ws.merge_cells(start_row=row, start_column=12, end_row=row, end_column=14)  # Impressions
-        ws.merge_cells(start_row=row, start_column=15, end_row=row, end_column=17) # Reach/Clicks
-        ws.merge_cells(start_row=row, start_column=18, end_row=row, end_column=19) # CPM/CPC
-        ws.merge_cells(start_row=row, start_column=20, end_row=row, end_column=21) # Freq/CTR
+        ws.merge_cells(start_row=row, start_column=8, end_row=row, end_column=10)   # Budget
+        ws.merge_cells(start_row=row, start_column=11, end_row=row, end_column=13)  # Impressions
+        ws.merge_cells(start_row=row, start_column=14, end_row=row, end_column=16) # Reach/Clicks
+        ws.merge_cells(start_row=row, start_column=17, end_row=row, end_column=18) # CPM/CPC
+        ws.merge_cells(start_row=row, start_column=19, end_row=row, end_column=20) # Freq/CTR
         return row + 2
 
     def write_data_row(row, data, funnel_type):
