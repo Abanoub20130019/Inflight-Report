@@ -552,7 +552,7 @@ if uploaded_raw is not None:
         agg_cols = {
             "Year": "first", "Period": "first", "Week": lambda x: ", ".join(map(str, sorted(x.unique()))),
             "Brand": "first", "Market": "first", "Channel": "first", "Funnel Type": "first",
-            "Campaign": "first",
+            "Campaign": "first", "Placement": "first",
             "Cost $": "sum", "Clicks": "sum", "Impressions": "sum",
             "Reach": "max", "Full Video Views": "sum", "Sessions": "sum",
             "Orders": "sum", "Revenue $": "sum", "Off. Orders": "sum", "Off. Revenue $": "sum",
