@@ -485,10 +485,10 @@ if uploaded_raw is not None:
         )
         if "week_selected" not in st.session_state:
             st.session_state.week_selected = [available_weeks[-1]] if available_weeks else []
-        week_selected = st.multiselect("Week Number(s)", options=available_weeks, key="week_selected")
         if st.button("Select All Weeks"):
             st.session_state.week_selected = available_weeks
             st.rerun()
+        week_selected = st.multiselect("Week Number(s)", options=available_weeks, key="week_selected")
     with col2:
         st.write("")
 
