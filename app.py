@@ -156,38 +156,40 @@ def build_formatted_report(report_data_by_market, all_data):
     # --- Column widths ---
     col_widths = {
         1: 10,   # Market
-        2: 12,   # Funnel
-        3: 16,   # Platform
+        2: 12,   # Region
+        3: 12,   # Audience
         4: 12,   # Ad Placement
-        5: 18,   # Campaign/Ad Format
-        6: 12,   # Budget Planned
-        7: 12,   # Budget Achieved
-        8: 8,    # Budget %
-        9: 14,   # Impressions Planned
-        10: 14,  # Impressions Achieved
-        11: 8,   # Impressions %
-        12: 12,  # Reach/Clicks Planned
-        13: 12,  # Reach/Clicks Achieved
-        14: 8,   # Reach/Clicks %
-        15: 10,  # CPM/CPC Planned
-        16: 10,  # CPM/CPC Achieved
-        17: 8,   # Freq/CTR Planned
-        18: 8,   # Freq/CTR Achieved
-        19: 10,  # Views/Sessions
-        20: 10,  # Engagement/Purchases
-        21: 8,   # VTR/Purchases Value
-        22: 8,   # ER/Purchase Roas
-        23: 10,  # Sessions (Awareness only)
-        24: 10,  # Purchases
-        25: 14,  # Purchases Value
-        26: 12,  # Purchase Roas
+        5: 12,   # Funnel
+        6: 16,   # Platform
+        7: 18,   # Campaign/Ad Format
+        8: 12,   # Budget Planned
+        9: 12,   # Budget Achieved
+        10: 8,   # Budget %
+        11: 14,  # Impressions Planned
+        12: 14,  # Impressions Achieved
+        13: 8,   # Impressions %
+        14: 12,  # Reach/Clicks Planned
+        15: 12,  # Reach/Clicks Achieved
+        16: 8,   # Reach/Clicks %
+        17: 10,  # CPM/CPC Planned
+        18: 10,  # CPM/CPC Achieved
+        19: 8,   # Freq/CTR Planned
+        20: 8,   # Freq/CTR Achieved
+        21: 10,  # Views/Sessions
+        22: 10,  # Engagement/Purchases
+        23: 8,   # VTR/Purchases Value
+        24: 8,   # ER/Purchase Roas
+        25: 10,  # Sessions (Awareness only)
+        26: 10,  # Purchases
+        27: 14,  # Purchases Value
+        28: 12,  # Purchase Roas
     }
     for col, width in col_widths.items():
         ws.column_dimensions[get_column_letter(col)].width = width
 
     # --- Header definitions ---
     AWARENESS_HEADERS = [
-        "Funnel", "Platform", "Ad Placement", "Campaign",
+        "Region", "Audience", "Ad Placement", "Funnel", "Platform", "Campaign",
         "Budget", "", "",
         "Impressions", "", "",
         "Reach", "", "",
@@ -197,7 +199,7 @@ def build_formatted_report(report_data_by_market, all_data):
         "Sessions", "Purchases", "Purchases Value", "Purchase Roas",
     ]
     AWARENESS_SUBHEADERS = [
-        "", "", "", "",
+        "", "", "", "", "", "",
         "Planned", "Achieved", "%",
         "Planned", "Achieved", "%",
         "Planned", "Achieved", "%",
@@ -208,7 +210,7 @@ def build_formatted_report(report_data_by_market, all_data):
     ]
 
     CONSIDERATION_HEADERS = [
-        "Funnel", "Platform", "Ad Placement", "Ad Format",
+        "Region", "Audience", "Ad Placement", "Funnel", "Platform", "Ad Format",
         "Budget", "", "",
         "Impressions", "", "",
         "Clicks", "", "",
@@ -217,7 +219,7 @@ def build_formatted_report(report_data_by_market, all_data):
         "Sessions", "Purchases", "Purchases Value", "Purchase Roas",
     ]
     CONSIDERATION_SUBHEADERS = [
-        "", "", "", "",
+        "", "", "", "", "", "",
         "Planned", "Achieved", "%",
         "Planned", "Achieved", "%",
         "Planned", "Achieved", "%",
@@ -227,13 +229,13 @@ def build_formatted_report(report_data_by_market, all_data):
     ]
 
     def add_kpi_banner(row, last_col):
-        cell = ws.cell(row=row, column=6, value="Primary KPI")
+        cell = ws.cell(row=row, column=9, value="Primary KPI")
         cell.fill = kpi_fill
         cell.font = kpi_font
         cell.alignment = center_align
         cell.border = thin_border
-        ws.merge_cells(start_row=row, start_column=6, end_row=row, end_column=last_col)
-        for col in range(6, last_col + 1):
+        ws.merge_cells(start_row=row, start_column=9, end_row=row, end_column=last_col)
+        for col in range(9, last_col + 1):
             c = ws.cell(row=row, column=col)
             c.fill = kpi_fill
             c.border = thin_border
@@ -255,16 +257,28 @@ def build_formatted_report(report_data_by_market, all_data):
             cell.border = thin_border
             cell.alignment = center_align
         # Merge grouped headers
-        ws.merge_cells(start_row=row, start_column=6, end_row=row, end_column=8)   # Budget
-        ws.merge_cells(start_row=row, start_column=9, end_row=row, end_column=11)  # Impressions
-        ws.merge_cells(start_row=row, start_column=12, end_row=row, end_column=14) # Reach/Clicks
-        ws.merge_cells(start_row=row, start_column=15, end_row=row, end_column=16) # CPM/CPC
-        ws.merge_cells(start_row=row, start_column=17, end_row=row, end_column=18) # Freq/CTR
+        ws.merge_cells(start_row=row, start_column=9, end_row=row, end_column=11)   # Budget
+        ws.merge_cells(start_row=row, start_column=12, end_row=row, end_column=14)  # Impressions
+        ws.merge_cells(start_row=row, start_column=15, end_row=row, end_column=17) # Reach/Clicks
+        ws.merge_cells(start_row=row, start_column=18, end_row=row, end_column=19) # CPM/CPC
+        ws.merge_cells(start_row=row, start_column=20, end_row=row, end_column=21) # Freq/CTR
         return row + 2
 
     def write_data_row(row, data, funnel_type):
-        # Column 2: Funnel
-        funnel_cell = ws.cell(row=row, column=2, value=data.get("funnel", ""))
+        # Column 2: Region
+        c2 = ws.cell(row=row, column=2, value=data.get("region", ""))
+        c2.border = thin_border; c2.alignment = center_align; c2.font = data_font
+
+        # Column 3: Audience
+        c3 = ws.cell(row=row, column=3, value=data.get("audience", ""))
+        c3.border = thin_border; c3.alignment = center_align; c3.font = data_font
+
+        # Column 4: Ad Placement
+        c4 = ws.cell(row=row, column=4, value=data.get("placement", ""))
+        c4.border = thin_border; c4.alignment = center_align; c4.font = data_font
+
+        # Column 5: Funnel
+        funnel_cell = ws.cell(row=row, column=5, value=data.get("funnel", ""))
         funnel_cell.border = thin_border
         funnel_cell.alignment = center_align
         if funnel_type == "Awareness":
@@ -277,101 +291,95 @@ def build_formatted_report(report_data_by_market, all_data):
             funnel_cell.fill = conversion_fill
             funnel_cell.font = conversion_font
 
-        # Column 3: Platform
-        platform_cell = ws.cell(row=row, column=3, value=data.get("platform", ""))
+        # Column 6: Platform
+        platform_cell = ws.cell(row=row, column=6, value=data.get("platform", ""))
         platform_cell.fill = platform_fill
         platform_cell.font = platform_font
         platform_cell.border = thin_border
         platform_cell.alignment = center_align
 
-        # Column 4: Ad Placement
-        c4 = ws.cell(row=row, column=4, value=data.get("placement", ""))
-        c4.border = thin_border
-        c4.alignment = center_align
-        c4.font = data_font
+        # Column 7: Campaign / Ad Format
+        c7 = ws.cell(row=row, column=7, value=data.get("campaign_adformat", ""))
+        c7.border = thin_border
+        c7.alignment = center_align
+        c7.font = data_font
 
-        # Column 5: Campaign / Ad Format
-        c5 = ws.cell(row=row, column=5, value=data.get("campaign_adformat", ""))
-        c5.border = thin_border
-        c5.alignment = center_align
-        c5.font = data_font
-
-        # Budget (6-8)
+        # Budget (8-10)
         bp = data.get("budget_planned", 0)
         ba = data.get("budget_achieved", 0)
         bpct = data.get("budget_pct", 0)
-        c6 = ws.cell(row=row, column=6, value=bp if bp else None)
-        c6.number_format = "$#,##0"; c6.border = thin_border; c6.alignment = right_align; c6.font = data_font
-        c7 = ws.cell(row=row, column=7, value=ba if ba else None)
-        c7.number_format = "$#,##0.00"; c7.border = thin_border; c7.alignment = right_align; c7.font = data_font
-        c8 = ws.cell(row=row, column=8, value=bpct if bpct else None)
-        c8.number_format = "0%"; c8.border = thin_border; c8.alignment = center_align; c8.font = data_font
+        c8 = ws.cell(row=row, column=8, value=bp if bp else None)
+        c8.number_format = "$#,##0"; c8.border = thin_border; c8.alignment = right_align; c8.font = data_font
+        c9 = ws.cell(row=row, column=9, value=ba if ba else None)
+        c9.number_format = "$#,##0.00"; c9.border = thin_border; c9.alignment = right_align; c9.font = data_font
+        c10 = ws.cell(row=row, column=10, value=bpct if bpct else None)
+        c10.number_format = "0%"; c10.border = thin_border; c10.alignment = center_align; c10.font = data_font
 
-        # Impressions (9-11)
+        # Impressions (11-13)
         ip = data.get("impressions_planned", 0)
         ia = data.get("impressions_achieved", 0)
         ipct = data.get("impressions_pct", 0)
-        c9 = ws.cell(row=row, column=9, value=ip if ip else None)
-        c9.number_format = "#,##0"; c9.border = thin_border; c9.alignment = right_align; c9.font = data_font
-        c10 = ws.cell(row=row, column=10, value=ia if ia else None)
-        c10.number_format = "#,##0"; c10.border = thin_border; c10.alignment = right_align; c10.font = data_font
-        c11 = ws.cell(row=row, column=11, value=ipct if ipct else None)
-        c11.number_format = "0%"; c11.border = thin_border; c11.alignment = center_align; c11.font = data_font
+        c11 = ws.cell(row=row, column=11, value=ip if ip else None)
+        c11.number_format = "#,##0"; c11.border = thin_border; c11.alignment = right_align; c11.font = data_font
+        c12 = ws.cell(row=row, column=12, value=ia if ia else None)
+        c12.number_format = "#,##0"; c12.border = thin_border; c12.alignment = right_align; c12.font = data_font
+        c13 = ws.cell(row=row, column=13, value=ipct if ipct else None)
+        c13.number_format = "0%"; c13.border = thin_border; c13.alignment = center_align; c13.font = data_font
 
-        # Metric 12-14 (Reach for Awareness, Clicks for Consideration)
+        # Metric 14-16 (Reach for Awareness, Clicks for Consideration)
         mp = data.get("metric_planned", 0)
         ma = data.get("metric_achieved", 0)
         mpct = data.get("metric_pct", 0)
-        c12 = ws.cell(row=row, column=12, value=mp if mp else None)
-        c12.number_format = "#,##0"; c12.border = thin_border; c12.alignment = right_align; c12.font = data_font
-        c13 = ws.cell(row=row, column=13, value=ma if ma else None)
-        c13.number_format = "#,##0"; c13.border = thin_border; c13.alignment = right_align; c13.font = data_font
-        c14 = ws.cell(row=row, column=14, value=mpct if mpct else None)
-        c14.number_format = "0%"; c14.border = thin_border; c14.alignment = center_align; c14.font = data_font
+        c14 = ws.cell(row=row, column=14, value=mp if mp else None)
+        c14.number_format = "#,##0"; c14.border = thin_border; c14.alignment = right_align; c14.font = data_font
+        c15 = ws.cell(row=row, column=15, value=ma if ma else None)
+        c15.number_format = "#,##0"; c15.border = thin_border; c15.alignment = right_align; c15.font = data_font
+        c16 = ws.cell(row=row, column=16, value=mpct if mpct else None)
+        c16.number_format = "0%"; c16.border = thin_border; c16.alignment = center_align; c16.font = data_font
 
-        # CPM/CPC (15-16)
+        # CPM/CPC (17-18)
         cpmp = data.get("cpm_planned", 0)
         cpma = data.get("cpm_achieved", 0)
-        c15 = ws.cell(row=row, column=15, value=cpmp if cpmp else None)
-        c15.number_format = "$#,##0.00"; c15.border = thin_border; c15.alignment = right_align; c15.font = data_font
-        c16 = ws.cell(row=row, column=16, value=cpma if cpma else None)
-        c16.number_format = "$#,##0.00"; c16.border = thin_border; c16.alignment = right_align; c16.font = data_font
+        c17 = ws.cell(row=row, column=17, value=cpmp if cpmp else None)
+        c17.number_format = "$#,##0.00"; c17.border = thin_border; c17.alignment = right_align; c17.font = data_font
+        c18 = ws.cell(row=row, column=18, value=cpma if cpma else None)
+        c18.number_format = "$#,##0.00"; c18.border = thin_border; c18.alignment = right_align; c18.font = data_font
 
-        # Freq/CTR (17-18)
+        # Freq/CTR (19-20)
         fp = data.get("freq_planned", 0)
         fa = data.get("freq_achieved", 0)
-        c17 = ws.cell(row=row, column=17, value=fp if fp else None)
-        c17.number_format = "0.00"; c17.border = thin_border; c17.alignment = center_align; c17.font = data_font
-        c18 = ws.cell(row=row, column=18, value=fa if fa else None)
-        c18.number_format = "0.00"; c18.border = thin_border; c18.alignment = center_align; c18.font = data_font
+        c19 = ws.cell(row=row, column=19, value=fp if fp else None)
+        c19.number_format = "0.00"; c19.border = thin_border; c19.alignment = center_align; c19.font = data_font
+        c20 = ws.cell(row=row, column=20, value=fa if fa else None)
+        c20.number_format = "0.00"; c20.border = thin_border; c20.alignment = center_align; c20.font = data_font
 
         if funnel_type == "Awareness":
-            c19 = ws.cell(row=row, column=19, value=data.get("views_achieved", 0) or None)
-            c19.number_format = "#,##0"; c19.border = thin_border; c19.alignment = right_align; c19.font = data_font
-            c20 = ws.cell(row=row, column=20, value=data.get("engagement_achieved", 0) or None)
-            c20.number_format = "#,##0"; c20.border = thin_border; c20.alignment = right_align; c20.font = data_font
-            c21 = ws.cell(row=row, column=21, value=data.get("vtr_achieved", 0) or None)
-            c21.number_format = "0.00%"; c21.border = thin_border; c21.alignment = center_align; c21.font = data_font
-            c22 = ws.cell(row=row, column=22, value=data.get("er_achieved", 0) or None)
-            c22.number_format = "0.00%"; c22.border = thin_border; c22.alignment = center_align; c22.font = data_font
-            c23 = ws.cell(row=row, column=23, value=data.get("sessions_achieved", 0) or None)
-            c23.number_format = "#,##0"; c23.border = thin_border; c23.alignment = right_align; c23.font = data_font
-            c24 = ws.cell(row=row, column=24, value=data.get("purchases_achieved", 0) or None)
-            c24.number_format = "#,##0"; c24.border = thin_border; c24.alignment = right_align; c24.font = data_font
-            c25 = ws.cell(row=row, column=25, value=data.get("purchases_value_achieved", 0) or None)
-            c25.number_format = "$#,##0.00"; c25.border = thin_border; c25.alignment = right_align; c25.font = data_font
-            c26 = ws.cell(row=row, column=26, value=data.get("purchase_roas_achieved", 0) or None)
-            c26.number_format = "0.00"; c26.border = thin_border; c26.alignment = right_align; c26.font = data_font
+            c21 = ws.cell(row=row, column=21, value=data.get("views_achieved", 0) or None)
+            c21.number_format = "#,##0"; c21.border = thin_border; c21.alignment = right_align; c21.font = data_font
+            c22 = ws.cell(row=row, column=22, value=data.get("engagement_achieved", 0) or None)
+            c22.number_format = "#,##0"; c22.border = thin_border; c22.alignment = right_align; c22.font = data_font
+            c23 = ws.cell(row=row, column=23, value=data.get("vtr_achieved", 0) or None)
+            c23.number_format = "0.00%"; c23.border = thin_border; c23.alignment = center_align; c23.font = data_font
+            c24 = ws.cell(row=row, column=24, value=data.get("er_achieved", 0) or None)
+            c24.number_format = "0.00%"; c24.border = thin_border; c24.alignment = center_align; c24.font = data_font
+            c25 = ws.cell(row=row, column=25, value=data.get("sessions_achieved", 0) or None)
+            c25.number_format = "#,##0"; c25.border = thin_border; c25.alignment = right_align; c25.font = data_font
+            c26 = ws.cell(row=row, column=26, value=data.get("purchases_achieved", 0) or None)
+            c26.number_format = "#,##0"; c26.border = thin_border; c26.alignment = right_align; c26.font = data_font
+            c27 = ws.cell(row=row, column=27, value=data.get("purchases_value_achieved", 0) or None)
+            c27.number_format = "$#,##0.00"; c27.border = thin_border; c27.alignment = right_align; c27.font = data_font
+            c28 = ws.cell(row=row, column=28, value=data.get("purchase_roas_achieved", 0) or None)
+            c28.number_format = "0.00"; c28.border = thin_border; c28.alignment = right_align; c28.font = data_font
         else:
-            c19 = ws.cell(row=row, column=19, value=data.get("sessions_achieved", 0) or None)
-            c19.number_format = "#,##0"; c19.border = thin_border; c19.alignment = right_align; c19.font = data_font
-            c20 = ws.cell(row=row, column=20, value=data.get("purchases_achieved", 0) or None)
-            c20.number_format = "#,##0"; c20.border = thin_border; c20.alignment = right_align; c20.font = data_font
-            c21 = ws.cell(row=row, column=21, value=data.get("purchases_value_achieved", 0) or None)
-            c21.number_format = "$#,##0.00"; c21.border = thin_border; c21.alignment = right_align; c21.font = data_font
-            c22 = ws.cell(row=row, column=22, value=data.get("purchase_roas_achieved", 0) or None)
-            c22.number_format = "0.00"; c22.border = thin_border; c22.alignment = right_align; c22.font = data_font
-            for col in range(23, 27):
+            c21 = ws.cell(row=row, column=21, value=data.get("sessions_achieved", 0) or None)
+            c21.number_format = "#,##0"; c21.border = thin_border; c21.alignment = right_align; c21.font = data_font
+            c22 = ws.cell(row=row, column=22, value=data.get("purchases_achieved", 0) or None)
+            c22.number_format = "#,##0"; c22.border = thin_border; c22.alignment = right_align; c22.font = data_font
+            c23 = ws.cell(row=row, column=23, value=data.get("purchases_value_achieved", 0) or None)
+            c23.number_format = "$#,##0.00"; c23.border = thin_border; c23.alignment = right_align; c23.font = data_font
+            c24 = ws.cell(row=row, column=24, value=data.get("purchase_roas_achieved", 0) or None)
+            c24.number_format = "0.00"; c24.border = thin_border; c24.alignment = right_align; c24.font = data_font
+            for col in range(25, 29):
                 c = ws.cell(row=row, column=col, value=None)
                 c.border = thin_border
         return row + 1
@@ -401,7 +409,7 @@ def build_formatted_report(report_data_by_market, all_data):
             rows = market_data.get(funnel, [])
             if not rows:
                 continue
-            last_col = 26 if funnel == "Awareness" else 22
+            last_col = 28 if funnel == "Awareness" else 24
             current_row = add_kpi_banner(current_row, last_col)
             if funnel == "Awareness":
                 current_row = apply_header_row(current_row, AWARENESS_HEADERS, AWARENESS_SUBHEADERS, last_col)
@@ -422,7 +430,7 @@ def build_formatted_report(report_data_by_market, all_data):
         current_row = add_market_section(current_row, "ALL", all_data)
 
     # Freeze panes at column E, row 3
-    ws.freeze_panes = "F3"
+    ws.freeze_panes = "H3"
 
     return wb
 
@@ -641,6 +649,11 @@ if uploaded_raw is not None:
                     channel = row["Channel"]
                     optimization = ""
 
+                    # Media plan fields
+                    region = ""
+                    audience = ""
+                    placement = ""
+
                     if planned is not None:
                         budget_planned = safe_numeric(planned.get("budget  usd", 0))
                         impressions_planned = safe_numeric(planned.get("impressions", 0))
@@ -648,6 +661,9 @@ if uploaded_raw is not None:
                         market = str(planned.get("market", row["Market"])).strip().upper()
                         channel = planned.get("channel", row["Channel"])
                         optimization = planned.get("optimization", "")
+                        region = str(planned.get("region", "")).strip()
+                        audience = str(planned.get("audience", "")).strip()
+                        placement = str(planned.get("placement", "")).strip()
 
                     # If no media plan budget but user entered market split %, calculate planned budget
                     budget_achieved = row["Cost $"]
@@ -686,9 +702,12 @@ if uploaded_raw is not None:
                     # ER = Engagement / Impressions (proxy using Sessions)
                     er_achieved = (engagement_achieved / impressions_achieved) if impressions_achieved else 0
 
+                    # Fallback: extract placement from campaign name if not in media plan
+                    if not placement:
+                        placement = extract_placement(row["Campaign"])
+
                     platform = format_platform(channel, optimization, funnel, row["Campaign"], combine=combine_platforms)
                     campaign_adformat = str(optimization).strip() if optimization else ""
-                    placement = str(row.get("Placement", "")).strip()
 
                     if funnel == "Awareness":
                         report_rows.append({
@@ -718,6 +737,8 @@ if uploaded_raw is not None:
                             "purchases_value_achieved": revenue_achieved,
                             "purchase_roas_achieved": roas,
                             "placement": placement,
+                            "region": region,
+                            "audience": audience,
                         })
                     else:
                         # Consideration or Conversion
@@ -748,6 +769,8 @@ if uploaded_raw is not None:
                             "purchases_value_achieved": revenue_achieved,
                             "purchase_roas_achieved": roas,
                             "placement": placement,
+                            "region": region,
+                            "audience": audience,
                         })
 
                 # Group by market and funnel
@@ -777,6 +800,9 @@ if uploaded_raw is not None:
                             "funnel": f,
                             "platform": r["platform"],
                             "campaign_adformat": r["campaign_adformat"],
+                            "region": "",
+                            "audience": "",
+                            "placement": "",
                             "budget_planned": 0,
                             "budget_achieved": 0,
                             "impressions_planned": 0,
@@ -799,6 +825,12 @@ if uploaded_raw is not None:
                         if f == "Awareness":
                             awareness_market_reach[key] = {}
                     entry = all_data[f][key]
+                    if not entry["region"] and r.get("region"):
+                        entry["region"] = r["region"]
+                    if not entry["audience"] and r.get("audience"):
+                        entry["audience"] = r["audience"]
+                    if not entry["placement"] and r.get("placement"):
+                        entry["placement"] = r["placement"]
                     entry["budget_planned"] += r["budget_planned"]
                     entry["budget_achieved"] += r["budget_achieved"]
                     entry["impressions_planned"] += r["impressions_planned"]
