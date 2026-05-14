@@ -536,7 +536,7 @@ if uploaded_raw is not None:
             "Brand": "first", "Market": "first", "Channel": "first", "Funnel Type": "first",
             "Campaign": "first",
             "Cost $": "sum", "Clicks": "sum", "Impressions": "sum",
-            "Reach": "sum", "Full Video Views": "sum", "Sessions": "sum",
+            "Reach": "max", "Full Video Views": "sum", "Sessions": "sum",
             "Orders": "sum", "Revenue $": "sum", "Off. Orders": "sum", "Off. Revenue $": "sum",
             "App Installs": "sum",
         }
