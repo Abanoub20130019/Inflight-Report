@@ -26,3 +26,9 @@ Thumbs.db
 
 # Streamlit
 .streamlit/
+
+# PyInstaller build artifacts
+build/
+dist/
+*.spec
+*.zip
