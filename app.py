@@ -655,7 +655,9 @@ if uploaded_raw is not None:
                     cpm_achieved = (budget_achieved / impressions_achieved * 1000) if impressions_achieved else 0
                     cpc_achieved = (budget_achieved / clicks_achieved) if clicks_achieved else 0
                     ctr_achieved = row["CTR"] if pd.notna(row["CTR"]) else 0
-                    freq_achieved = row["Frequency"] if pd.notna(row["Frequency"]) else 0
+                    # Frequency = Impressions / Reach (calculated, not taken from raw data)
+                    freq_planned = (impressions_planned / reach_planned) if reach_planned else 0
+                    freq_achieved = (impressions_achieved / reach_achieved) if reach_achieved else 0
                     views_achieved = row["Full Video Views"] if pd.notna(row["Full Video Views"]) else 0
                     vtr_achieved = row["VTR"] if pd.notna(row["VTR"]) else 0
                     engagement_achieved = row["Sessions"] if pd.notna(row["Sessions"]) else 0
@@ -683,7 +685,7 @@ if uploaded_raw is not None:
                             "metric_pct": reach_pct,
                             "cpm_planned": cpm_planned,
                             "cpm_achieved": cpm_achieved,
-                            "freq_planned": 0,
+                            "freq_planned": freq_planned,
                             "freq_achieved": freq_achieved,
                             "views_achieved": views_achieved,
                             "engagement_achieved": engagement_achieved,
@@ -808,6 +810,9 @@ if uploaded_raw is not None:
                         if f == "Awareness":
                             entry["vtr_achieved"] = (entry["views_achieved"] / entry["impressions_achieved"]) if entry["impressions_achieved"] else 0
                             entry["er_achieved"] = (entry["engagement_achieved"] / entry["impressions_achieved"]) if entry["impressions_achieved"] else 0
+                            # Frequency = Impressions / Reach for ALL aggregation
+                            entry["freq_planned"] = (entry["impressions_planned"] / entry["metric_planned"]) if entry["metric_planned"] else 0
+                            entry["freq_achieved"] = (entry["impressions_achieved"] / entry["metric_achieved"]) if entry["metric_achieved"] else 0
                         all_report_data[f].append(entry)
 
                 # Build formatted REPORT workbook
